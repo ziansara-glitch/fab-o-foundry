@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Fab o foundry? · Project work STMicroelectronics</title>
+  <meta name="description" content="Due strumenti interattivi per capire quando conviene produrre i chip in casa e perché, per chi possiede le fabbriche, un calo dei volumi pesa così tanto sui margini.">
+
+  <!-- Font: Google Fonts, con font di sistema come riserva (vedi style.css) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Chart.js con versione fissata; i due script restano in quest'ordine -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"
+          integrity="sha512-ZwR1/gSZM3ai6vCdI+LVF1zSq/5HznD3ZSTk7kajkaj4D292NLuduDCO1c/NT8Id+jE58KYLKT7hXnbtryGmMg=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <p class="eyebrow">Project work · STMicroelectronics</p>
+    <h1>Fab o foundry?</h1>
+    <p class="lead">Questo sito propone due strumenti interattivi: il primo mostra quando conviene produrre i chip in casa invece di comprarli da una foundry, il secondo perché, per chi possiede le fabbriche, un calo dei volumi pesa così tanto sui margini. Muovi i cursori per vedere i meccanismi economici all'opera.</p>
+    <ul class="tags" aria-label="I tre modelli di business dei semiconduttori">
+      <li class="tag tag-idm"><strong>IDM</strong> progetta e produce · ST</li>
+      <li class="tag tag-fabless"><strong>Fabless</strong> progetta e compra · NVIDIA</li>
+      <li class="tag tag-foundry"><strong>Foundry</strong> produce per altri · TSMC</li>
+    </ul>
+  </div>
+</header>
+
+<main class="wrap">
+  <noscript>
+    <p class="panel">Per usare gli strumenti interattivi serve JavaScript.</p>
+  </noscript>
+
+  <!-- ===================== Strumento 1: make or buy ===================== -->
+  <section class="tool" id="make-or-buy" aria-labelledby="t1-title">
+    <div class="tool-head">
+      <p class="eyebrow">Strumento 1</p>
+      <h2 id="t1-title">Make or buy: fab propria o foundry?</h2>
+      <p>Confronta il costo totale di produrre i wafer in casa (make) con quello di comprarli da una foundry (buy). Tutti i parametri sono illustrativi.</p>
+    </div>
+
+    <div class="scenarios" id="t1-scenarios" role="group" aria-label="Scenari"></div>
+    <p class="scenario-note" id="t1-scenario-note" aria-live="polite"></p>
+
+    <div class="tool-grid">
+      <fieldset class="panel controls" id="t1-controls">
+        <legend>Parametri <span class="badge">illustrativi</span></legend>
+        <p class="hint"><strong>t</strong> riassume i costi di transazione di Coase: cercare il fornitore, negoziare, scrivere e far rispettare il contratto. Per Williamson sono più alti con investimenti specifici, incertezza e frequenza elevate: in quel caso la gerarchia (make) diventa conveniente.</p>
+      </fieldset>
+
+      <div class="results">
+        <dl class="kpis">
+          <div class="kpi"><dt>Costo totale make</dt><dd id="t1-make">—</dd></div>
+          <div class="kpi"><dt>Costo totale buy</dt><dd id="t1-buy">—</dd></div>
+          <div class="kpi"><dt>Pareggio Q*</dt><dd id="t1-be">—</dd></div>
+          <div class="kpi"><dt>Verdetto</dt><dd><span class="verdict" id="t1-verdict" aria-live="polite">—</span></dd></div>
+        </dl>
+
+        <div class="panel chart-panel">
+          <div class="chart-wrap">
+            <canvas id="t1-chart" role="img" aria-label="Grafico dei costi totali di make e buy in funzione del volume."></canvas>
+          </div>
+          <ul class="legend" aria-label="Legenda del grafico">
+            <li><span class="swatch sw-make"></span>Make (fab propria)</li>
+            <li><span class="swatch sw-buy"></span>Buy (foundry)</li>
+            <li><span class="swatch sw-chosen"></span>Volume scelto</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <pre class="formulas"><code>CT_make = CF + cv · Q / 1000
+CT_buy  = (p + t) · Q / 1000
+Q*      = CF · 1000 / (p + t − cv)</code></pre>
+    <p class="formulas-note">CT e CF in M$/anno · Q e Q* in migliaia di wafer/anno · cv, p, t in $/wafer. Conviene make se CT_make &lt; CT_buy, altrimenti buy. Se p + t − cv ≤ 0 non c'è pareggio: buy sempre.</p>
+
+    <div class="notes">
+      <article class="panel note">
+        <h3>Sopra e sotto Q*</h3>
+        <p>Sotto Q* conviene comprare; sopra, i costi fissi si distribuiscono su abbastanza wafer e produrre in casa costa meno.</p>
+      </article>
+      <article class="panel note">
+        <h3>Perché esistono le foundry</h3>
+        <p>Una fab ha costi fissi enormi; chi raccoglie i volumi di molti clienti, come TSMC, supera Q* con facilità, mentre un'azienda fabless come NVIDIA progetta e compra.</p>
+      </article>
+      <article class="panel note">
+        <h3>Coase e Williamson</h3>
+        <p>Se comprare diventa rischioso (crisi di fornitura, tensioni geopolitiche), t sale, Q* scende e la fab propria conviene prima. È l'idea di Coase e Williamson, ed è l'ipotesi del project work per spiegare perché ST mantiene le proprie fab.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ===================== Strumento 2: leva operativa ===================== -->
+  <section class="tool" id="leva-operativa" aria-labelledby="t2-title">
+    <div class="tool-head">
+      <p class="eyebrow">Strumento 2</p>
+      <h2 id="t2-title">Leva operativa: perché un calo dei volumi pesa tanto</h2>
+      <p>Con costi fissi alti, un calo dei volumi riduce i ricavi ma non i costi della fab: l'utile scende molto più dei ricavi. Tutti i parametri sono illustrativi.</p>
+    </div>
+
+    <div class="tool-grid">
+      <fieldset class="panel controls" id="t2-controls">
+        <legend>Parametri <span class="badge">illustrativi</span></legend>
+      </fieldset>
+
+      <div class="results">
+        <dl class="kpis">
+          <div class="kpi"><dt>Pareggio Q*</dt><dd id="t2-be">—</dd></div>
+          <div class="kpi"><dt>Margine operativo prima</dt><dd id="t2-m0">—</dd></div>
+          <div class="kpi"><dt>Margine operativo dopo</dt><dd id="t2-m1">—</dd></div>
+          <div class="kpi"><dt>Variazione dell'utile</dt><dd id="t2-du">—</dd></div>
+        </dl>
+
+        <div class="panel chart-panel">
+          <div class="chart-wrap">
+            <canvas id="t2-chart" role="img" aria-label="Grafico di ricavi e costi totali in funzione del volume."></canvas>
+          </div>
+          <ul class="legend" aria-label="Legenda del grafico">
+            <li><span class="swatch sw-revenue"></span>Ricavi</li>
+            <li><span class="swatch sw-cost"></span>Costi totali</li>
+            <li><span class="swatch sw-dot"></span>Pareggio</li>
+            <li><span class="swatch sw-before"></span>Volume prima</li>
+            <li><span class="swatch sw-after"></span>Volume dopo il calo</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <pre class="formulas"><code>Q1 = Q · (1 − d/100)
+U0 = (p − cv) · Q / 1000 − CF
+U1 = (p − cv) · Q1 / 1000 − CF
+R0 = p · Q / 1000
+R1 = p · Q1 / 1000
+Margine prima = U0 / R0
+Margine dopo  = U1 / R1
+Variazione utile = (U1 − U0) / U0
+Q* = CF · 1000 / (p − cv)</code></pre>
+    <p class="formulas-note">U = utile operativo e R = ricavi, in M$/anno; 0 = prima del calo, 1 = dopo. Se U0 ≤ 0 l'azienda è in perdita e la variazione non è calcolata; se p ≤ cv non esiste un pareggio.</p>
+
+    <aside class="panel case" aria-labelledby="case-title">
+      <h3 id="case-title">Il caso reale: STMicroelectronics</h3>
+      <div class="table-wrap">
+        <table class="data-table">
+          <caption class="sr-only">Dati reali di STMicroelectronics, 2024 e 2025</caption>
+          <thead>
+            <tr><th scope="col">Dato</th><th scope="col" class="num">2024</th><th scope="col" class="num">2025</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">Ricavi netti</th><td class="num">13,27 mld $</td><td class="num">11,80 mld $</td></tr>
+            <tr><th scope="row">Margine operativo</th><td class="num">12,6%</td><td class="num">1,5%</td></tr>
+            <tr><th scope="row">Utile netto</th><td class="num">1,56 mld $</td><td class="num">0,17 mld $</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top: 14px;">Con ricavi in calo dell'11%, il margine operativo è sceso di oltre 11 punti. La leva operativa ne spiega una parte; nella Parte 2 del project work si verifica nel bilancio quanto dipende dai volumi e quanto da prezzi, costi e oneri straordinari.</p>
+      <p class="source">Fonte: <a href="https://app.researchpool.com/company/stm-nl0000226223-stmicroelectronics-UeuzyR4Vra/press/stmicroelectronics-nv-stm-stmicroelectronics-reports-q4-and-fy-2025-financial-results-vWte8tKRA1" target="_blank" rel="noopener noreferrer">STMicroelectronics, risultati del quarto trimestre e dell'esercizio 2025</a> (via ResearchPool). I parametri dello strumento sopra sono illustrativi e non riproducono questi dati.</p>
+    </aside>
+  </section>
+
+  <!-- ===================== Sezione 3: confronto ===================== -->
+  <section class="tool" id="confronto" aria-labelledby="t3-title">
+    <div class="tool-head">
+      <p class="eyebrow">Sezione 3</p>
+      <h2 id="t3-title">Confronto: ST, NVIDIA e TSMC</h2>
+      <p>Tre aziende, tre modelli di business. Gli indicatori finanziari reali verranno aggiunti, ognuno con la sua fonte: finché non sono disponibili le celle restano vuote (—).</p>
+    </div>
+    <!-- La tabella viene creata da app.js a partire da COMPARISON_DATA -->
+    <div class="table-wrap" id="comparison"></div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p>I parametri degli strumenti sono illustrativi: mostrano il meccanismo economico, non stimano i costi reali di ST.</p>
+    <p>Riferimenti teorici: R. Coase, <em>The Nature of the Firm</em> (1937); O. Williamson, <em>The Economic Institutions of Capitalism</em> (1985).</p>
+    <p>Project work di Business Management · Ingegneria Meccanica · a.a. 2026/27</p>
+  </div>
+</footer>
+
+</body>
+</html>
